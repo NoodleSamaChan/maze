@@ -3,7 +3,7 @@ use rand::Rng;
 use window_rs::WindowBuffer;
 use minifb::{Window, Key, KeyRepeat};
 
-const VISITED_COLOR: u32 = 0x0000ff;
+const VISITED_COLOR: u32 = 0x0000ff; 
 const FREE_SPACE: u32 = 0;
 
 pub fn generate_maze(buffer: &mut WindowBuffer, rng: &mut impl Rng) {
@@ -67,6 +67,29 @@ pub fn generate_maze(buffer: &mut WindowBuffer, rng: &mut impl Rng) {
     }
 }
 
+pub fn start_end_generator (buffer: &mut WindowBuffer, rng: &mut impl Rng) -> (usize, usize) {
+    let mut start_point_ready = false;
+    let mut end_point_ready = false;
+    loop {
+        let start_height = rng.gen_range(0..buffer.height());
+        let end_height = rng.gen_range(0..buffer.height());
+        let width_max = buffer.width() - 1;
+
+        if start_point_ready == false && buffer[(1, start_height)] == 0 {
+            buffer[(0, start_height)] = 0x00FF00;
+            start_point_ready = true;
+        }
+        if end_point_ready == false && buffer[(&width_max - 1, end_height)] == 0 {
+            buffer[(width_max, end_height)] = 0xFF00FF;
+            end_point_ready = true;
+        }
+        if start_point_ready == true && end_point_ready == true {
+            return (0, start_height);
+        }
+    }
+    
+}
+
 fn middle_point(a: (usize, usize), b: (usize, usize)) -> (usize, usize) {
     if a.0 != b.0 {
         let min = a.0.min(b.0);
@@ -105,10 +128,10 @@ impl Player {
 pub fn handle_user_input(
         &mut self,
         window: &Window,
-        buffer: &WindowBuffer,
+        start_point: &(usize, usize)
     ) -> std::io::Result<()> {
         if window.is_key_pressed(Key::Q, KeyRepeat::No) {
-            self.reset();
+            self.reset(*start_point);
         }
 
         if window.is_key_pressed(Key::Up, KeyRepeat::Yes) {
@@ -139,8 +162,8 @@ pub fn handle_user_input(
         Ok(())
     }
 
-    pub fn reset(&self) {
-        self.position = todo!();
+    pub fn reset(&mut self, start_point: (usize, usize)) {
+        self.position = start_point;
         self.direction = Direction::Still;
 
     }

@@ -1,4 +1,4 @@
-use maze::generate_maze;
+use maze::{generate_maze, start_end_generator};
 use minifb::{Key, Window, WindowOptions};
 use window_rs::WindowBuffer;
 
@@ -7,6 +7,7 @@ fn main() {
 
     let mut rng = rand::thread_rng();
     generate_maze(&mut buffer, &mut rng);
+    start_end_generator(&mut buffer, &mut rng);
 
     let mut window = Window::new(
         "Test - ESC to exit",
