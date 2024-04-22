@@ -1,6 +1,7 @@
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use window_rs::WindowBuffer;
+use minifb::{Window, Key, KeyRepeat};
 
 const VISITED_COLOR: u32 = 0x0000ff;
 const FREE_SPACE: u32 = 0;
@@ -70,6 +71,69 @@ fn middle_point(a: (usize, usize), b: (usize, usize)) -> (usize, usize) {
         (a.0, min + (max - min) / 2)
     } else {
         a
+    }
+}
+
+#[derive(PartialEq)]
+pub enum Direction {
+    North,
+    South,
+    East,
+    West,
+    Still,
+}
+
+pub struct Player {
+    position: (usize, usize),
+    direction: Direction,
+}
+impl Player {
+    pub fn new(position: (usize, usize), direction: Direction,) -> Self {
+        Self{position,
+        direction,}
+    }
+
+pub fn handle_user_input(
+        &mut self,
+        window: &Window,
+        buffer: &WindowBuffer,
+    ) -> std::io::Result<()> {
+        if window.is_key_pressed(Key::Q, KeyRepeat::No) {
+            self.reset();
+        }
+
+        if window.is_key_pressed(Key::Up, KeyRepeat::Yes) {
+            self.direction = Direction::North;
+        }
+
+        if window.is_key_pressed(Key::Down, KeyRepeat::Yes) {
+            self.direction = Direction::South;
+        }
+
+        if window.is_key_pressed(Key::Right, KeyRepeat::Yes) {
+            self.direction = Direction::East;
+        }
+
+        if window.is_key_pressed(Key::Left, KeyRepeat::Yes) {
+            self.direction = Direction::West;
+        }
+
+        /*let small_break = Duration::from_millis(0);
+        if self.small_break_timer.elapsed() >= small_break {
+            window.get_keys_released().iter().for_each(|key| match key {
+                Key::Space => self.space_count += 1,
+                _ => (),
+            });
+            self.small_break_timer = Instant::now();
+        }*/
+
+        Ok(())
+    }
+
+    pub fn reset(&self) {
+        self.position = todo!();
+        self.direction = Direction::Still;
+
     }
 }
 
