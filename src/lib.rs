@@ -56,6 +56,15 @@ pub fn generate_maze(buffer: &mut WindowBuffer, rng: &mut impl Rng) {
             buffer[wall] = VISITED_COLOR;
         }
     }
+    for x in 0..buffer.width() {
+        for y in 0..buffer.height() {
+            if buffer[(x, y)] == FREE_SPACE {
+                buffer[(x, y)] = VISITED_COLOR
+            } else {
+                buffer[(x, y)] = FREE_SPACE
+            }
+        }
+    }
 }
 
 fn middle_point(a: (usize, usize), b: (usize, usize)) -> (usize, usize) {
