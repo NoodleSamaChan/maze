@@ -124,13 +124,15 @@ pub struct Player {
     end_point: (usize, usize),
     direction: Direction,
     previous_spot: (usize, usize), 
+    pub game_over : bool,
 }
 impl Player {
-    pub fn new(position: (usize, usize), end_point: (usize, usize), direction: Direction, previous_spot: (usize, usize)) -> Self {
+    pub fn new(position: (usize, usize), end_point: (usize, usize), direction: Direction, previous_spot: (usize, usize), game_over : bool) -> Self {
         Self{position,
             end_point,
             direction,
-            previous_spot,}
+            previous_spot,
+            game_over,}
     }
 
 pub fn handle_user_input(
@@ -182,30 +184,63 @@ pub fn handle_user_input(
         match self.direction {
             Direction::East => {
                 if buffer.get(x as isize + 1, y as isize) != None && buffer[(x + 1, y)] != VISITED_COLOR {
-                    self.position = (x + 1, y);
-                    self.direction = Direction::Still;
-                    self.previous_spot = (x, y);
+                    if (x + 1, y) == self.end_point {
+                        println!("Congrats, you've finished the maze!");
+                        self.position = (x + 1, y);
+                        self.direction = Direction::Still;
+                        self.previous_spot = (x, y);
+                        self.game_over = true;
+                        
+                    } else {
+                        self.position = (x + 1, y);
+                        self.direction = Direction::Still;
+                        self.previous_spot = (x, y);
+                    }
                 }
             }
             Direction::North => {
                 if buffer.get(x as isize, y as isize - 1) != None && buffer[(x, y - 1)] != VISITED_COLOR {
-                    self.position = (x, y - 1);
-                    self.direction = Direction::Still;
-                    self.previous_spot = (x, y);
+                    if (x, y - 1) == self.end_point {
+                        println!("Congrats, you've finished the maze!");
+                        self.position = (x, y - 1);
+                        self.direction = Direction::Still;
+                        self.previous_spot = (x, y);
+                        self.game_over = true;
+                    } else {
+                        self.position = (x, y - 1);
+                        self.direction = Direction::Still;
+                        self.previous_spot = (x, y);
+                    }
                 }
             }
             Direction::South => {
                 if buffer.get(x as isize, y as isize + 1) != None && buffer[(x, y + 1)] != VISITED_COLOR {
-                    self.position = (x, y + 1);
-                    self.direction = Direction::Still;
-                    self.previous_spot = (x, y);
+                    if (x, y + 1) == self.end_point {
+                        println!("Congrats, you've finished the maze!");
+                        self.position = (x, y + 1);
+                        self.direction = Direction::Still;
+                        self.previous_spot = (x, y);
+                        self.game_over = true;
+                    } else {
+                        self.position = (x, y + 1);
+                        self.direction = Direction::Still;
+                        self.previous_spot = (x, y);
+                    }
                 }
             }
             Direction::West => {
                 if buffer.get(x as isize - 1, y as isize) != None && buffer[(x - 1, y)] != VISITED_COLOR {
-                    self.position = (x - 1, y);
-                    self.direction = Direction::Still;
-                    self.previous_spot = (x, y);
+                    if (x - 1, y) == self.end_point {
+                        println!("Congrats, you've finished the maze!");
+                        self.position = (x - 1, y);
+                        self.direction = Direction::Still;
+                        self.previous_spot = (x, y);
+                        self.game_over = true;
+                    } else {
+                        self.position = (x - 1, y);
+                        self.direction = Direction::Still;
+                        self.previous_spot = (x, y);
+                    }
                 }
             }
             Direction::Still => {
@@ -247,7 +282,7 @@ mod test {
     fn generate_start_and_end() {
         let mut buffer: WindowBuffer = WindowBuffer::new(10, 10);
         let mut rng = StdRng::seed_from_u64(38);
-        let mut player = Player::new((0, 0), (0, 0), Direction::Still, (0, 0));
+        let mut player = Player::new((0, 0), (0, 0), Direction::Still, (0, 0), false);
         start_end_generator(&mut buffer, &mut rng, &mut player);
 
         insta::assert_snapshot!(buffer, @r###"
@@ -268,7 +303,7 @@ mod test {
     fn direction_check() {
         let mut buffer: WindowBuffer = WindowBuffer::new(10, 10);
         let mut rng = StdRng::seed_from_u64(38);
-        let mut player = Player::new((0, 0), (0, 0), Direction::Still, (0, 0));
+        let mut player = Player::new((0, 0), (0, 0), Direction::Still, (0, 0), false);
         start_end_generator(&mut buffer, &mut rng, &mut player);
 
         insta::assert_snapshot!(buffer, @r###"
