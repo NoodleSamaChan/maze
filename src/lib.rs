@@ -3,7 +3,7 @@ use rand::Rng;
 use window_rs::WindowBuffer;
 use minifb::{Window, Key, KeyRepeat};
 
-const VISITED_COLOR: u32 = 0x0000ff; 
+const VISITED_COLOR: u32 = 0x4287f5; 
 const FREE_SPACE: u32 = 0;
 
 pub fn generate_maze(buffer: &mut WindowBuffer, rng: &mut impl Rng) {
