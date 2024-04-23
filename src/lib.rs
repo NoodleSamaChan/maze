@@ -72,6 +72,50 @@ impl MazeConfig {
                 buffer[wall] = self.path_color;
             }
         }
+
+        // Most of the maze has been generated, we need to fix the edges
+        // We're going to randomely convert some walls on the edge into pathway
+        let width = buffer.width();
+        let height = buffer.height();
+        // Fix the top and bottom
+        for x in 1..(width - 1) {
+            // we don't want to create an ugly pattern of wall so we're going to randomely break some walls
+            if buffer[(x, 0)] == self.wall_color
+                && buffer[(x - 1, 0)] == self.wall_color
+                && buffer[(x + 1, 0)] == self.wall_color
+                && buffer[(x, 1)] == self.path_color
+                && rng.gen()
+            {
+                buffer[(x, 0)] = self.path_color;
+            }
+            if buffer[(x, height - 1)] == self.wall_color
+                && buffer[(x - 1, height - 1)] == self.wall_color
+                && buffer[(x + 1, height - 1)] == self.wall_color
+                && buffer[(x, height - 2)] == self.path_color
+                && rng.gen()
+            {
+                buffer[(x, height - 1)] = self.path_color;
+            }
+        }
+        for y in 1..(height - 1) {
+            // we don't want to create an ugly pattern of wall so we're going to randomely break some walls
+            if buffer[(0, y)] == self.wall_color
+                && buffer[(0, y - 1)] == self.wall_color
+                && buffer[(0, y + 1)] == self.wall_color
+                && buffer[(0, y)] == self.path_color
+                && rng.gen()
+            {
+                buffer[(0, y)] = self.path_color;
+            }
+            if buffer[(width - 1, y)] == self.wall_color
+                && buffer[(width - 1, y - 1)] == self.wall_color
+                && buffer[(width - 1, y + 1)] == self.wall_color
+                && buffer[(width - 2, y)] == self.path_color
+                && rng.gen()
+            {
+                buffer[(width - 1, y)] = self.path_color;
+            }
+        }
     }
 }
 
