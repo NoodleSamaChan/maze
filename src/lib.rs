@@ -88,11 +88,11 @@ pub fn start_end_generator(
         let width_max = buffer.width() - 1;
 
         if start_point_ready == false && buffer[(1, start_height)] == 0 {
-            buffer[(0, start_height)] = 0x00FF00;
+            buffer[(0, start_height)] = player.player_color;
             start_point_ready = true;
         }
         if end_point_ready == false && buffer[(&width_max - 1, end_height)] == 0 {
-            buffer[(width_max, end_height)] = 0xFF00FF;
+            buffer[(width_max, end_height)] = player.finish_color;
             end_point_ready = true;
         }
         if start_point_ready == true && end_point_ready == true {
@@ -131,11 +131,16 @@ pub enum Direction {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Player {
+    player_color: u32,
     position: (usize, usize),
+
+    finish_color: u32,
     end_point: (usize, usize),
+
     direction: Direction,
     previous_spot: (usize, usize),
     maze_config: MazeConfig,
+
     pub game_over: bool,
 }
 
@@ -149,6 +154,8 @@ impl Player {
         game_over: bool,
     ) -> Self {
         Self {
+            player_color: 0x00FF00,
+            finish_color: 0xFF00FF,
             position,
             end_point,
             direction,
@@ -282,7 +289,7 @@ impl Player {
 
 pub fn display(player: &Player, buffer: &mut WindowBuffer) {
     buffer[player.previous_spot] = player.maze_config.path_color;
-    buffer[player.position] = 0x00FF00;
+    buffer[player.position] = player.player_color;
 }
 
 #[cfg(test)]
