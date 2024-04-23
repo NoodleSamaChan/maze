@@ -8,8 +8,8 @@ edition = "2021"
 [dependencies]
 minifb = "0.25.0"
 rand = "0.8.5"
-# window_rs = {git = "https://github.com/NoodleSamaChan/window_rs"}
-window_rs = { path = "../window_rs"}
+window_rs = {git = "https://github.com/NoodleSamaChan/window_rs.git"}
+#window_rs = { path = "../window_rs"}
 
 [dev-dependencies]
 insta = "1.38.0"
