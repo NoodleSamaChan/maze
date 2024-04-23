@@ -1,73 +1,85 @@
+use minifb::{Key, KeyRepeat, Window};
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use window_rs::WindowBuffer;
-use minifb::{Window, Key, KeyRepeat};
 
-const VISITED_COLOR: u32 = 0x4287f5; 
-const FREE_SPACE: u32 = 0;
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct MazeConfig {
+    /// The color used for the path
+    pub path_color: u32,
 
-pub fn generate_maze(buffer: &mut WindowBuffer, rng: &mut impl Rng) {
-    buffer.reset();
+    /// The color used for the walls
+    pub wall_color: u32,
+}
 
-    let x = rng.gen_range(0..buffer.width());
-    let y = rng.gen_range(0..buffer.height());
-
-    let mut stack = Vec::new();
-    stack.push((x, y));
-    buffer[(x, y)] = VISITED_COLOR;
-
-    while let Some(cell) = stack.pop() {
-        let (x, y) = (cell.0 as isize, cell.1 as isize);
-
-        let mut to_explore = Vec::new();
-
-        if let Some(cell) = buffer.get(x - 2, y) {
-            if cell == FREE_SPACE {
-                let (x, y) = (x as usize, y as usize);
-                to_explore.push((x as usize - 2, y as usize));
-            }
-        }
-        if let Some(cell) = buffer.get(x + 2, y) {
-            if cell == FREE_SPACE {
-                let (x, y) = (x as usize, y as usize);
-                to_explore.push((x as usize + 2, y as usize));
-            }
-        }
-        if let Some(cell) = buffer.get(x, y - 2) {
-            if cell == FREE_SPACE {
-                let (x, y) = (x as usize, y as usize);
-                to_explore.push((x as usize, y as usize - 2));
-            }
-        }
-        if let Some(cell) = buffer.get(x, y + 2) {
-            if cell == FREE_SPACE {
-                let (x, y) = (x as usize, y as usize);
-                to_explore.push((x as usize, y as usize + 2));
-            }
-        }
-
-        if let Some(cell2) = to_explore.choose(rng) {
-            if to_explore.len() > 1 {
-                stack.push(cell);
-            }
-            stack.push(*cell2);
-            buffer[*cell2] = VISITED_COLOR;
-            let wall = middle_point(cell, *cell2);
-            buffer[wall] = VISITED_COLOR;
+impl Default for MazeConfig {
+    fn default() -> Self {
+        Self {
+            path_color: 0,
+            wall_color: u32::MAX,
         }
     }
-    for x in 0..buffer.width() {
-        for y in 0..buffer.height() {
-            if buffer[(x, y)] == FREE_SPACE {
-                buffer[(x, y)] = VISITED_COLOR
-            } else {
-                buffer[(x, y)] = FREE_SPACE
+}
+
+impl MazeConfig {
+    pub fn generate(&self, buffer: &mut WindowBuffer, rng: &mut impl Rng) {
+        buffer.fill(self.wall_color);
+
+        let x = rng.gen_range(0..buffer.width());
+        let y = rng.gen_range(0..buffer.height());
+
+        let mut stack = Vec::new();
+        stack.push((x, y));
+        buffer[(x, y)] = self.path_color;
+
+        while let Some(cell) = stack.pop() {
+            let (x, y) = (cell.0 as isize, cell.1 as isize);
+
+            let mut to_explore = Vec::new();
+
+            if let Some(cell) = buffer.get(x - 2, y) {
+                if cell == self.wall_color {
+                    let (x, y) = (x as usize, y as usize);
+                    to_explore.push((x as usize - 2, y as usize));
+                }
+            }
+            if let Some(cell) = buffer.get(x + 2, y) {
+                if cell == self.wall_color {
+                    let (x, y) = (x as usize, y as usize);
+                    to_explore.push((x as usize + 2, y as usize));
+                }
+            }
+            if let Some(cell) = buffer.get(x, y - 2) {
+                if cell == self.wall_color {
+                    let (x, y) = (x as usize, y as usize);
+                    to_explore.push((x as usize, y as usize - 2));
+                }
+            }
+            if let Some(cell) = buffer.get(x, y + 2) {
+                if cell == self.wall_color {
+                    let (x, y) = (x as usize, y as usize);
+                    to_explore.push((x as usize, y as usize + 2));
+                }
+            }
+
+            if let Some(cell2) = to_explore.choose(rng) {
+                if to_explore.len() > 1 {
+                    stack.push(cell);
+                }
+                stack.push(*cell2);
+                buffer[*cell2] = self.path_color;
+                let wall = middle_point(cell, *cell2);
+                buffer[wall] = self.path_color;
             }
         }
     }
 }
 
-pub fn start_end_generator (buffer: &mut WindowBuffer, rng: &mut impl Rng, player: &mut Player) -> (usize, usize) {
+pub fn start_end_generator(
+    buffer: &mut WindowBuffer,
+    rng: &mut impl Rng,
+    player: &mut Player,
+) -> (usize, usize) {
     let mut start_point_ready = false;
     let mut end_point_ready = false;
     loop {
@@ -90,7 +102,6 @@ pub fn start_end_generator (buffer: &mut WindowBuffer, rng: &mut impl Rng, playe
             return (0, start_height);
         }
     }
-    
 }
 
 fn middle_point(a: (usize, usize), b: (usize, usize)) -> (usize, usize) {
@@ -118,27 +129,39 @@ pub enum Direction {
     Still,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Player {
     position: (usize, usize),
     end_point: (usize, usize),
     direction: Direction,
-    previous_spot: (usize, usize), 
-    pub game_over : bool,
+    previous_spot: (usize, usize),
+    maze_config: MazeConfig,
+    pub game_over: bool,
 }
+
 impl Player {
-    pub fn new(position: (usize, usize), end_point: (usize, usize), direction: Direction, previous_spot: (usize, usize), game_over : bool) -> Self {
-        Self{position,
+    pub fn new(
+        position: (usize, usize),
+        end_point: (usize, usize),
+        direction: Direction,
+        previous_spot: (usize, usize),
+        maze_config: MazeConfig,
+        game_over: bool,
+    ) -> Self {
+        Self {
+            position,
             end_point,
             direction,
             previous_spot,
-            game_over,}
+            maze_config,
+            game_over,
+        }
     }
 
-pub fn handle_user_input(
+    pub fn handle_user_input(
         &mut self,
         window: &Window,
-        start_point: &(usize, usize)
+        start_point: &(usize, usize),
     ) -> std::io::Result<()> {
         if window.is_key_pressed(Key::Q, KeyRepeat::No) {
             self.reset(*start_point);
@@ -175,7 +198,6 @@ pub fn handle_user_input(
     pub fn reset(&mut self, start_point: (usize, usize)) {
         self.position = start_point;
         self.direction = Direction::Still;
-
     }
 
     pub fn direction(&mut self, buffer: &WindowBuffer) {
@@ -183,14 +205,15 @@ pub fn handle_user_input(
         let y = self.position.1;
         match self.direction {
             Direction::East => {
-                if buffer.get(x as isize + 1, y as isize) != None && buffer[(x + 1, y)] != VISITED_COLOR {
+                if buffer.get(x as isize + 1, y as isize) != None
+                    && buffer[(x + 1, y)] != self.maze_config.wall_color
+                {
                     if (x + 1, y) == self.end_point {
                         println!("Congrats, you've finished the maze!");
                         self.position = (x + 1, y);
                         self.direction = Direction::Still;
                         self.previous_spot = (x, y);
                         self.game_over = true;
-                        
                     } else {
                         self.position = (x + 1, y);
                         self.direction = Direction::Still;
@@ -199,7 +222,9 @@ pub fn handle_user_input(
                 }
             }
             Direction::North => {
-                if buffer.get(x as isize, y as isize - 1) != None && buffer[(x, y - 1)] != VISITED_COLOR {
+                if buffer.get(x as isize, y as isize - 1) != None
+                    && buffer[(x, y - 1)] != self.maze_config.wall_color
+                {
                     if (x, y - 1) == self.end_point {
                         println!("Congrats, you've finished the maze!");
                         self.position = (x, y - 1);
@@ -214,7 +239,9 @@ pub fn handle_user_input(
                 }
             }
             Direction::South => {
-                if buffer.get(x as isize, y as isize + 1) != None && buffer[(x, y + 1)] != VISITED_COLOR {
+                if buffer.get(x as isize, y as isize + 1) != None
+                    && buffer[(x, y + 1)] != self.maze_config.wall_color
+                {
                     if (x, y + 1) == self.end_point {
                         println!("Congrats, you've finished the maze!");
                         self.position = (x, y + 1);
@@ -229,7 +256,9 @@ pub fn handle_user_input(
                 }
             }
             Direction::West => {
-                if buffer.get(x as isize - 1, y as isize) != None && buffer[(x - 1, y)] != VISITED_COLOR {
+                if buffer.get(x as isize - 1, y as isize) != None
+                    && buffer[(x - 1, y)] != self.maze_config.wall_color
+                {
                     if (x - 1, y) == self.end_point {
                         println!("Congrats, you've finished the maze!");
                         self.position = (x - 1, y);
@@ -246,13 +275,13 @@ pub fn handle_user_input(
             Direction::Still => {
                 self.position = self.position.clone();
                 self.previous_spot = self.previous_spot;
-            }  
+            }
         }
     }
 }
 
-pub fn display(player: &Player, buffer: &mut WindowBuffer){
-    buffer[player.previous_spot] = FREE_SPACE;
+pub fn display(player: &Player, buffer: &mut WindowBuffer) {
+    buffer[player.previous_spot] = player.maze_config.path_color;
     buffer[player.position] = 0x00FF00;
 }
 
@@ -266,7 +295,7 @@ mod test {
     fn test_generate_maze() {
         let mut buffer: WindowBuffer = WindowBuffer::new(6, 6);
         let mut rng = StdRng::seed_from_u64(38);
-        generate_maze(&mut buffer, &mut rng);
+        MazeConfig::default().generate(&mut buffer, &mut rng);
 
         insta::assert_snapshot!(buffer, @r###"
         #.....
@@ -282,7 +311,14 @@ mod test {
     fn generate_start_and_end() {
         let mut buffer: WindowBuffer = WindowBuffer::new(10, 10);
         let mut rng = StdRng::seed_from_u64(38);
-        let mut player = Player::new((0, 0), (0, 0), Direction::Still, (0, 0), false);
+        let mut player = Player::new(
+            (0, 0),
+            (0, 0),
+            Direction::Still,
+            (0, 0),
+            MazeConfig::default(),
+            false,
+        );
         start_end_generator(&mut buffer, &mut rng, &mut player);
 
         insta::assert_snapshot!(buffer, @r###"
@@ -303,7 +339,14 @@ mod test {
     fn direction_check() {
         let mut buffer: WindowBuffer = WindowBuffer::new(10, 10);
         let mut rng = StdRng::seed_from_u64(38);
-        let mut player = Player::new((0, 0), (0, 0), Direction::Still, (0, 0), false);
+        let mut player = Player::new(
+            (0, 0),
+            (0, 0),
+            Direction::Still,
+            (0, 0),
+            MazeConfig::default(),
+            false,
+        );
         start_end_generator(&mut buffer, &mut rng, &mut player);
 
         insta::assert_snapshot!(buffer, @r###"
@@ -322,7 +365,6 @@ mod test {
         player.direction = Direction::North;
         player.direction(&buffer);
         display(&mut player, &mut buffer);
-
 
         insta::assert_snapshot!(buffer, @r###"
         ..........
