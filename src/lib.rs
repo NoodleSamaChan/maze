@@ -10,6 +10,9 @@ pub struct MazeConfig {
 
     /// The color used for the walls
     pub wall_color: u32,
+
+    /// Quantity of open walls in the maze
+    pub open_walls: usize,
 }
 
 impl Default for MazeConfig {
@@ -17,6 +20,7 @@ impl Default for MazeConfig {
         Self {
             path_color: 0,
             wall_color: u32::MAX,
+            open_walls: 0,
         }
     }
 }
@@ -116,6 +120,55 @@ impl MazeConfig {
                 buffer[(width - 1, y)] = self.path_color;
             }
         }
+
+        // Now let's open some walls
+
+        // 1. We starts by opening interesting walls first
+        //    If we don't find any interesting wall for 100 try we exit
+        let mut opened_walls = 0;
+        let mut retry = 0;
+        while opened_walls < self.open_walls && retry < 100 {
+            let x = rng.gen_range(1..buffer.width() - 1);
+            let y = rng.gen_range(1..buffer.height() - 1);
+            if buffer[(x, y)] == self.wall_color && self.path_around((x, y), &buffer) == 2 {
+                opened_walls += 1;
+                buffer[(x, y)] = self.path_color;
+                // We found an interesting wall, we can reset the number of try
+                retry = 0;
+            }
+            // We didn't find anything
+            retry += 1;
+        }
+
+        // 2. We can't find any interesting walls anymore, we're just going to drop all remaining walls
+        'outer: for x in 0..buffer.width() {
+            for y in 0..buffer.height() {
+                if buffer[(x, y)] == self.wall_color {
+                    buffer[(x, y)] = self.path_color;
+                    opened_walls += 1;
+                    if opened_walls > self.open_walls {
+                        break 'outer;
+                    }
+                }
+            }
+        }
+    }
+
+    fn path_around(&self, (x, y): (usize, usize), buffer: &WindowBuffer) -> usize {
+        let (x, y) = (x as isize, y as isize);
+
+        buffer
+            .get(x - 1, y)
+            .map_or(false, |cell| cell == self.path_color) as usize
+            + buffer
+                .get(x + 1, y)
+                .map_or(false, |cell| cell == self.path_color) as usize
+            + buffer
+                .get(x, y - 1)
+                .map_or(false, |cell| cell == self.path_color) as usize
+            + buffer
+                .get(x, y + 1)
+                .map_or(false, |cell| cell == self.path_color) as usize
     }
 }
 
