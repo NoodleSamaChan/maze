@@ -102,7 +102,7 @@ impl MazeConfig {
             if buffer[(0, y)] == self.wall_color
                 && buffer[(0, y - 1)] == self.wall_color
                 && buffer[(0, y + 1)] == self.wall_color
-                && buffer[(0, y)] == self.path_color
+                && buffer[(1, y)] == self.path_color
                 && rng.gen()
             {
                 buffer[(0, y)] = self.path_color;
