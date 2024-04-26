@@ -187,12 +187,12 @@ pub fn start_end_generator(
         if start_point_ready == false && buffer[(1, start_height)] == 0 {
             buffer[(0, start_height)] = player.player_color;
             start_point_ready = true;
-            println!("start point ");
+            println!("start point");
         }
         if end_point_ready == false && buffer[(&width_max - 1, end_height)] == 0 {
             buffer[(width_max, end_height)] = player.finish_color;
             end_point_ready = true;
-            println!("end point ");
+            println!("end point");
         }
         if start_point_ready == true && end_point_ready == true {
             player.end_point = (width_max, end_height);
