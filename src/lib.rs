@@ -1,7 +1,7 @@
-use minifb::{Key, KeyRepeat, Window};
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use window_rs::WindowBuffer;
+use graphic::{self, Graphic, Key};
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct MazeConfig {
@@ -264,28 +264,28 @@ impl Player {
         }
     }
 
-    pub fn handle_user_input(
+    pub fn handle_user_input<W: Graphic>(
         &mut self,
-        window: &Window,
+        window: &W,
         start_point: &(usize, usize),
     ) -> std::io::Result<()> {
-        if window.is_key_pressed(Key::Q, KeyRepeat::No) {
+        if window.is_key_pressed(Key::Quit) {
             self.reset(*start_point);
         }
 
-        if window.is_key_pressed(Key::Up, KeyRepeat::Yes) {
+        if window.is_key_pressed(Key::Up) {
             self.direction = Direction::North;
         }
 
-        if window.is_key_pressed(Key::Down, KeyRepeat::Yes) {
+        if window.is_key_pressed(Key::Down) {
             self.direction = Direction::South;
         }
 
-        if window.is_key_pressed(Key::Right, KeyRepeat::Yes) {
+        if window.is_key_pressed(Key::Right) {
             self.direction = Direction::East;
         }
 
-        if window.is_key_pressed(Key::Left, KeyRepeat::Yes) {
+        if window.is_key_pressed(Key::Left) {
             self.direction = Direction::West;
         }
 

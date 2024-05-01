@@ -1,6 +1,6 @@
 use core::time::Duration;
+use graphic::{minifb::Minifb, Graphic, Key};
 use maze::{display, start_end_generator, MazeConfig, Player};
-use minifb::{Key, Window, WindowOptions};
 use std::time::Instant;
 use window_rs::WindowBuffer;
 
@@ -20,20 +20,7 @@ fn main() {
     );
     let start_point = start_end_generator(&mut buffer, &mut rng, &mut player);
 
-    let mut window = Window::new(
-        "Test - ESC to exit",
-        buffer.width(),
-        buffer.height(),
-        WindowOptions {
-            scale: minifb::Scale::X16,
-            ..WindowOptions::default()
-        },
-    )
-    .unwrap_or_else(|e| {
-        panic!("{}", e);
-    });
-
-    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
+    let mut window = Minifb::new("Maze - ESC to exit", buffer.width(), buffer.height());
 
     let mut update_time_wait = Instant::now();
 
@@ -48,7 +35,6 @@ fn main() {
         }
 
         window
-            .update_with_buffer(&buffer.buffer(), buffer.width(), buffer.height())
-            .unwrap();
+            .update_with_buffer(&buffer)
     }
 }
