@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8.5"
-window_rs = {git = "https://github.com/NoodleSamaChan/window_rs.git"}
+window_rs = {git = "https://github.com/NoodleSamaChan/window_rs.git", rev = "6068419"}
 #window_rs = { path = "../window_rs"}
 graphic = {git = "https://github.com/NoodleSamaChan/graphic.git"}
 
