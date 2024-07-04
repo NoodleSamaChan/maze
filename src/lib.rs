@@ -245,12 +245,12 @@ pub struct Player {
 
 impl Player {
     pub fn new(
-        position: (usize, usize),
-        end_point: (usize, usize),
-        direction: Direction,
-        previous_spot: (usize, usize),
-        maze_config: MazeConfig,
-        game_over: bool,
+        pub position: (usize, usize),
+        pub end_point: (usize, usize),
+        pub direction: Direction,
+        pub previous_spot: (usize, usize),
+        pub maze_config: MazeConfig,
+        pub game_over: bool,
     ) -> Self {
         Self {
             player_color: 0x00FF00,
