@@ -253,8 +253,8 @@ impl Player {
         game_over: bool,
     ) -> Self {
         Self {
-            player_color: 0x00FF00,
-            finish_color: 0xFF00FF,
+            player_color: 0x00FF0000,
+            finish_color: 0xFF00FF00,
             position,
             end_point,
             direction,
