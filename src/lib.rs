@@ -230,27 +230,27 @@ pub enum Direction {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Player {
-    player_color: u32,
-    position: (usize, usize),
+    pub player_color: u32,
+    pub position: (usize, usize),
 
-    finish_color: u32,
-    end_point: (usize, usize),
+    pub finish_color: u32,
+    pub end_point: (usize, usize),
 
-    direction: Direction,
-    previous_spot: (usize, usize),
-    maze_config: MazeConfig,
+    pub direction: Direction,
+    pub previous_spot: (usize, usize),
+    pub maze_config: MazeConfig,
 
     pub game_over: bool,
 }
 
 impl Player {
     pub fn new(
-        pub position: (usize, usize),
-        pub end_point: (usize, usize),
-        pub direction: Direction,
-        pub previous_spot: (usize, usize),
-        pub maze_config: MazeConfig,
-        pub game_over: bool,
+        position: (usize, usize),
+        end_point: (usize, usize),
+        direction: Direction,
+        previous_spot: (usize, usize),
+        maze_config: MazeConfig,
+        game_over: bool,
     ) -> Self {
         Self {
             player_color: 0x00FF00,
