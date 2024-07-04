@@ -389,6 +389,7 @@ impl Player {
 pub fn display(player: &Player, buffer: &mut WindowBuffer) {
     buffer[player.previous_spot] = player.maze_config.path_color;
     buffer[player.position] = player.player_color;
+    buffer[player.end_point] = player.finish_color;
 }
 
 #[cfg(test)]
